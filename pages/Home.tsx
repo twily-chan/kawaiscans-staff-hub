@@ -7,6 +7,7 @@ import { ChartsSection } from '../components/ChartsSection';
 import { AnimatedText } from '../components/AnimatedText';
 import { KuboMascot } from '../components/KuboMascot';
 import { Sparkles, Crown } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 export default function Home() {
   const [staffData, setStaffData] = useState<StaffMember[]>([]);
@@ -23,6 +24,15 @@ export default function Home() {
     if (loadedMascot && loadedMascot.gifs.length > 0) {
        setHeroImage(loadedMascot.gifs[Math.floor(Math.random() * loadedMascot.gifs.length)]);
     }
+
+    // Auto rotate hero image every 6 seconds
+    const interval = setInterval(() => {
+      if (loadedMascot && loadedMascot.gifs.length > 0) {
+         setHeroImage(loadedMascot.gifs[Math.floor(Math.random() * loadedMascot.gifs.length)]);
+      }
+    }, 6000);
+
+    return () => clearInterval(interval);
   }, []);
 
   const roles = staffData.length > 0 
@@ -129,51 +139,53 @@ export default function Home() {
         <Sparkles className="absolute bottom-20 right-1/2 w-12 h-12 text-kawai-purple animate-bounce opacity-50" />
       </section>
 
-      {/* Stats Section */}
-      <ChartsSection staffList={staffData} />
+      {/* Combined Staff & Hobbies Section for Navigation */}
+      <div id="staff">
+        {/* Stats Section */}
+        <ChartsSection staffList={staffData} />
 
-      {/* Staff Grid Section */}
-      <main className="max-w-7xl mx-auto px-4 py-20 relative">
-        <div className="absolute top-0 right-0 -z-10 opacity-5 pointer-events-none sticky top-20">
-           <h2 className="text-[12rem] leading-none font-display text-black writing-vertical">KUBO</h2>
-        </div>
-        
-        {/* Filter Bar */}
-        <div className="flex flex-wrap justify-center gap-4 mb-12">
-          {roles.map((role, idx) => (
-            <button
-              key={role}
-              onClick={() => setFilter(role)}
-              className={`
-                px-6 py-2 font-display text-xl border-4 border-black transition-all duration-300
-                ${filter === role 
-                  ? 'bg-kawai-pink text-white shadow-[2px_2px_0px_0px_#000] translate-y-1 scale-110' 
-                  : 'bg-white text-black shadow-funky hover:-translate-y-1 hover:bg-kawai-cyan hover:rotate-2'}
-              `}
-              style={{ animationDelay: `${idx * 100}ms` }}
-            >
-              {role.toUpperCase()}
-            </button>
-          ))}
-        </div>
-
-        {/* Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 gap-y-12">
-          {filteredStaff.map((staff, idx) => (
-            <div key={staff.id} className="animate-pop-in" style={{ animationDelay: `${idx * 0.1}s` }}>
-              <StaffCard staff={staff} />
-            </div>
-          ))}
-        </div>
-
-        {filteredStaff.length === 0 && (
-          <div className="text-center py-20 bg-white border-4 border-black shadow-funky mx-auto max-w-lg">
-            <h3 className="font-display text-4xl text-black mb-4">Shiraishi is hiding...</h3>
-            <p className="font-body text-xl">We can't find anyone with that role!</p>
+        {/* Staff Grid Section */}
+        <main className="max-w-7xl mx-auto px-4 py-20 relative">
+          <div className="absolute top-0 right-0 -z-10 opacity-5 pointer-events-none sticky top-20">
+             <h2 className="text-[12rem] leading-none font-display text-black writing-vertical">KUBO</h2>
           </div>
-        )}
+          
+          {/* Filter Bar */}
+          <div className="flex flex-wrap justify-center gap-4 mb-12">
+            {roles.map((role, idx) => (
+              <button
+                key={role}
+                onClick={() => setFilter(role)}
+                className={`
+                  px-6 py-2 font-display text-xl border-4 border-black transition-all duration-300
+                  ${filter === role 
+                    ? 'bg-kawai-pink text-white shadow-[2px_2px_0px_0px_#000] translate-y-1 scale-110' 
+                    : 'bg-white text-black shadow-funky hover:-translate-y-1 hover:bg-kawai-cyan hover:rotate-2'}
+                `}
+                style={{ animationDelay: `${idx * 100}ms` }}
+              >
+                {role.toUpperCase()}
+              </button>
+            ))}
+          </div>
 
-      </main>
+          {/* Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 gap-y-12">
+            {filteredStaff.map((staff, idx) => (
+              <div key={staff.id} className="animate-pop-in" style={{ animationDelay: `${idx * 0.1}s` }}>
+                <StaffCard staff={staff} />
+              </div>
+            ))}
+          </div>
+
+          {filteredStaff.length === 0 && (
+            <div className="text-center py-20 bg-white border-4 border-black shadow-funky mx-auto max-w-lg">
+              <h3 className="font-display text-4xl text-black mb-4">Shiraishi is hiding...</h3>
+              <p className="font-body text-xl">We can't find anyone with that role!</p>
+            </div>
+          )}
+        </main>
+      </div>
 
       {/* Footer */}
       <footer className="bg-black text-white py-12 border-t-8 border-kawai-pink relative overflow-hidden">
@@ -184,9 +196,8 @@ export default function Home() {
           </h2>
           <p className="font-bold mb-8 text-xl">Made with <span className="text-red-500 animate-pulse inline-block">♥</span> and too much caffeine.</p>
           <div className="flex justify-center gap-6">
-             <a href="#" className="hover:text-kawai-cyan transition-colors font-bold uppercase underline decoration-wavy hover:scale-110 transform duration-200">Discord</a>
-             <a href="#" className="hover:text-kawai-cyan transition-colors font-bold uppercase underline decoration-wavy hover:scale-110 transform duration-200">Recruitment</a>
-             <a href="#" className="hover:text-kawai-cyan transition-colors font-bold uppercase underline decoration-wavy hover:scale-110 transform duration-200">Donate</a>
+             <a href="https://discord.gg/xsFP9VBp7e" target="_blank" rel="noopener noreferrer" className="hover:text-kawai-cyan transition-colors font-bold uppercase underline decoration-wavy hover:scale-110 transform duration-200">Discord</a>
+             <Link to="/apply" className="hover:text-kawai-cyan transition-colors font-bold uppercase underline decoration-wavy hover:scale-110 transform duration-200">Recruitment</Link>
           </div>
           <p className="mt-8 text-gray-500 text-sm">© 2024 Kawaiscans. Kubo-san is watching you.</p>
         </div>

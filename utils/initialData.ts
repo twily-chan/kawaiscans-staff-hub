@@ -2,7 +2,15 @@ import { StaffMember, MascotData } from '../types';
 
 // Update this version number whenever you push new changes to GitHub!
 // This forces visitors' browsers to load the new data instead of their old cached copy.
-export const DATA_VERSION = '1.0.0';
+export const DATA_VERSION = '1.0.1';
+
+export const INITIAL_HOBBY_CATEGORIES = [
+  'Creative',
+  'Active',
+  'Chill',
+  'Tech',
+  'Otaku'
+];
 
 export const INITIAL_STAFF: StaffMember[] = [
   {

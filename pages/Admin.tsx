@@ -2,24 +2,28 @@ import React, { useState, useEffect } from 'react';
 import { GoogleLogin } from '@react-oauth/google';
 import { jwtDecode } from 'jwt-decode';
 import { Link } from 'react-router-dom';
-import { getStaffData, saveStaffData, getMascotData, saveMascotData } from '../utils/storage';
+import { getStaffData, saveStaffData, getMascotData, saveMascotData, getHobbyCategories, saveHobbyCategories } from '../utils/storage';
 import { StaffMember, MascotData } from '../types';
-import { Trash2, Save, UploadCloud, Plus, RefreshCw, LogOut } from 'lucide-react';
+import { Trash2, Save, UploadCloud, Plus, RefreshCw, LogOut, Dices, X } from 'lucide-react';
 
 export default function Admin() {
   const [user, setUser] = useState<any>(null);
   const [staffList, setStaffList] = useState<StaffMember[]>([]);
   const [mascotData, setMascotData] = useState<MascotData>({ gifs: [], quotes: [], fallbackImage: '' });
+  const [hobbyCategories, setHobbyCategories] = useState<string[]>([]);
   const [isSyncing, setIsSyncing] = useState(false);
   const [statusMsg, setStatusMsg] = useState('');
+  const [newCategory, setNewCategory] = useState('');
 
   // Authorized emails from env
-  const adminEmails = (import.meta.env.VITE_ADMIN_EMAILS || '').split(',');
+  // Fix: Cast import.meta to any to resolve missing type definition for env
+  const adminEmails = ((import.meta as any).env.VITE_ADMIN_EMAILS || '').split(',');
 
   useEffect(() => {
     // Load initial data
     setStaffList(getStaffData());
     setMascotData(getMascotData());
+    setHobbyCategories(getHobbyCategories());
   }, []);
 
   const handleLoginSuccess = (credentialResponse: any) => {
@@ -38,6 +42,7 @@ export default function Admin() {
   const handleSaveLocal = () => {
     saveStaffData(staffList);
     saveMascotData(mascotData);
+    saveHobbyCategories(hobbyCategories);
     setStatusMsg('Saved to local browser storage! (Visitors won\'t see this yet)');
     setTimeout(() => setStatusMsg(''), 3000);
   };
@@ -55,16 +60,19 @@ import { StaffMember, MascotData } from '../types';
 // This forces visitors' browsers to load the new data instead of their old cached copy.
 export const DATA_VERSION = '${new Date().getTime()}';
 
+export const INITIAL_HOBBY_CATEGORIES = ${JSON.stringify(hobbyCategories, null, 2)};
+
 export const INITIAL_STAFF: StaffMember[] = ${JSON.stringify(staffList, null, 2)};
 
 export const INITIAL_MASCOT: MascotData = ${JSON.stringify(mascotData, null, 2)};
 `;
 
-      const response = await fetch(`https://api.github.com/repos/${import.meta.env.VITE_GITHUB_REPO}/dispatches`, {
+      // Fix: Cast import.meta to any for env usage
+      const response = await fetch(`https://api.github.com/repos/${(import.meta as any).env.VITE_GITHUB_REPO}/dispatches`, {
         method: 'POST',
         headers: {
           Accept: 'application/vnd.github.v3+json',
-          Authorization: `token ${import.meta.env.VITE_GITHUB_TOKEN}`,
+          Authorization: `token ${(import.meta as any).env.VITE_GITHUB_TOKEN}`,
         },
         body: JSON.stringify({
           event_type: 'update_data',
@@ -94,7 +102,7 @@ export const INITIAL_MASCOT: MascotData = ${JSON.stringify(mascotData, null, 2)}
   const addHobby = (staffId: string) => {
     setStaffList(prev => prev.map(s => {
       if (s.id === staffId) {
-        return { ...s, hobbies: [...s.hobbies, { name: 'New Hobby', category: 'Creative' }] };
+        return { ...s, hobbies: [...s.hobbies, { name: 'New Hobby', category: hobbyCategories[0] || 'Creative' }] };
       }
       return s;
     }));
@@ -139,6 +147,20 @@ export const INITIAL_MASCOT: MascotData = ${JSON.stringify(mascotData, null, 2)}
       coffeeConsumption: 1
     };
     setStaffList([...staffList, newStaff]);
+  };
+
+  // ---- CATEGORY HELPERS ----
+  const addCategory = () => {
+    if (newCategory.trim() && !hobbyCategories.includes(newCategory.trim())) {
+      setHobbyCategories([...hobbyCategories, newCategory.trim()]);
+      setNewCategory('');
+    }
+  };
+
+  const removeCategory = (cat: string) => {
+    if (confirm(`Remove category "${cat}"?`)) {
+      setHobbyCategories(hobbyCategories.filter(c => c !== cat));
+    }
   };
 
   // Render Login
@@ -188,6 +210,33 @@ export const INITIAL_MASCOT: MascotData = ${JSON.stringify(mascotData, null, 2)}
            </div>
         </div>
 
+        {/* HOBBY CATEGORY CONFIG */}
+        <div className="bg-white p-6 border-4 border-black">
+          <h2 className="text-3xl font-display mb-6 border-b-2 border-gray-200 pb-2">Hobby Categories</h2>
+          <p className="text-sm text-gray-500 mb-4">Manage the categories available for staff hobbies. These are used in the charts.</p>
+          
+          <div className="flex flex-wrap gap-2 mb-4">
+             {hobbyCategories.map(cat => (
+               <span key={cat} className="bg-gray-100 border border-black px-3 py-1 flex items-center gap-2 font-bold text-sm">
+                 {cat}
+                 <button onClick={() => removeCategory(cat)} className="text-red-500 hover:text-red-700"><X size={14}/></button>
+               </span>
+             ))}
+          </div>
+
+          <div className="flex gap-2 max-w-sm">
+             <input 
+               type="text" 
+               className="border-2 border-gray-300 p-2 w-full" 
+               placeholder="New Category..." 
+               value={newCategory} 
+               onChange={(e) => setNewCategory(e.target.value)}
+               onKeyDown={(e) => e.key === 'Enter' && addCategory()}
+             />
+             <button onClick={addCategory} className="bg-kawai-cyan border-2 border-black px-4 font-bold hover:bg-cyan-300">ADD</button>
+          </div>
+        </div>
+
         {/* STAFF SECTION */}
         <div className="bg-white p-6 border-4 border-black">
           <div className="flex justify-between items-center mb-6 border-b-2 border-gray-200 pb-2">
@@ -202,13 +251,37 @@ export const INITIAL_MASCOT: MascotData = ${JSON.stringify(mascotData, null, 2)}
               <div key={staff.id} className="border-2 border-gray-300 p-4 relative bg-gray-50 group hover:border-black transition-colors">
                 <button 
                   onClick={() => deleteStaff(staff.id)}
-                  className="absolute top-2 right-2 text-red-400 hover:text-red-600"
+                  className="absolute top-2 right-2 text-red-400 hover:text-red-600 z-10"
                 >
                   <Trash2 size={20} />
                 </button>
 
                 <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
                   <div className="space-y-2">
+                    
+                    {/* AVATAR CONTROL */}
+                    <div className="flex items-start gap-2 bg-gray-100 p-2 border border-gray-300">
+                        <img src={staff.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${staff.id}`} className="w-12 h-12 border-2 border-black bg-white object-cover shrink-0" alt="avatar" />
+                        <div className="min-w-0 flex-1">
+                            <label className="text-xs font-bold text-gray-500 block">Avatar URL</label>
+                            <div className="flex gap-1">
+                                <input 
+                                    className="w-full border p-1 text-xs" 
+                                    value={staff.avatarUrl} 
+                                    onChange={(e) => updateStaff(staff.id, 'avatarUrl', e.target.value)}
+                                    placeholder="https://..."
+                                />
+                                <button 
+                                    onClick={() => updateStaff(staff.id, 'avatarUrl', `https://api.dicebear.com/7.x/avataaars/svg?seed=${Date.now()}`)}
+                                    className="bg-kawai-yellow px-2 border border-black hover:bg-yellow-400 text-black flex items-center justify-center"
+                                    title="Generate Random Avatar"
+                                >
+                                <Dices size={14} />
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
                     <label className="text-xs font-bold text-gray-500">Name</label>
                     <input className="w-full border p-1" value={staff.name} onChange={(e) => updateStaff(staff.id, 'name', e.target.value)} />
                     
@@ -244,7 +317,7 @@ export const INITIAL_MASCOT: MascotData = ${JSON.stringify(mascotData, null, 2)}
                       <div key={idx} className="flex gap-1 mb-1">
                         <input className="w-2/3 border text-xs p-1" value={hobby.name} onChange={(e) => updateHobby(staff.id, idx, 'name', e.target.value)} />
                         <select className="w-1/3 border text-xs p-1" value={hobby.category} onChange={(e) => updateHobby(staff.id, idx, 'category', e.target.value as any)}>
-                          {['Creative', 'Active', 'Chill', 'Tech', 'Otaku'].map(c => <option key={c} value={c}>{c}</option>)}
+                          {hobbyCategories.map(c => <option key={c} value={c}>{c}</option>)}
                         </select>
                         <button onClick={() => removeHobby(staff.id, idx)} className="text-red-500 text-xs">x</button>
                       </div>

@@ -1,8 +1,9 @@
-import { INITIAL_STAFF, INITIAL_MASCOT, DATA_VERSION } from './initialData';
+import { INITIAL_STAFF, INITIAL_MASCOT, INITIAL_HOBBY_CATEGORIES, DATA_VERSION } from './initialData';
 import { StaffMember, MascotData } from '../types';
 
 const STAFF_KEY = 'kawai_staff_data';
 const MASCOT_KEY = 'kawai_mascot_data';
+const CATEGORIES_KEY = 'kawai_hobby_categories';
 const VERSION_KEY = 'kawai_data_version';
 
 // Initialize storage with defaults if empty OR if version mismatch
@@ -15,6 +16,7 @@ export const initStorage = () => {
     console.log(`Version mismatch or no data. Resetting to ${DATA_VERSION}`);
     localStorage.setItem(STAFF_KEY, JSON.stringify(INITIAL_STAFF));
     localStorage.setItem(MASCOT_KEY, JSON.stringify(INITIAL_MASCOT));
+    localStorage.setItem(CATEGORIES_KEY, JSON.stringify(INITIAL_HOBBY_CATEGORIES));
     localStorage.setItem(VERSION_KEY, DATA_VERSION);
     window.dispatchEvent(new Event('storage'));
   }
@@ -40,5 +42,16 @@ export const getMascotData = (): MascotData => {
 
 export const saveMascotData = (data: MascotData) => {
   localStorage.setItem(MASCOT_KEY, JSON.stringify(data));
+  window.dispatchEvent(new Event('storage'));
+};
+
+export const getHobbyCategories = (): string[] => {
+  initStorage();
+  const data = localStorage.getItem(CATEGORIES_KEY);
+  return data ? JSON.parse(data) : INITIAL_HOBBY_CATEGORIES;
+};
+
+export const saveHobbyCategories = (data: string[]) => {
+  localStorage.setItem(CATEGORIES_KEY, JSON.stringify(data));
   window.dispatchEvent(new Event('storage'));
 };

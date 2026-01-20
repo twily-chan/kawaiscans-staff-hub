@@ -8,14 +8,26 @@ export const KuboMascot: React.FC = () => {
   const [imgSrc, setImgSrc] = useState<string>(''); 
   const [quote, setQuote] = useState('');
 
-  // Load data on mount
+  // Load data and start rotation
   useEffect(() => {
     const loaded = getMascotData();
     setData(loaded);
+    
+    // Initial setup
     if (loaded && loaded.gifs.length > 0) {
       setImgSrc(loaded.gifs[Math.floor(Math.random() * loaded.gifs.length)]);
       setQuote(loaded.quotes[Math.floor(Math.random() * loaded.quotes.length)]);
     }
+
+    // Auto rotate every 10 seconds
+    const intervalId = setInterval(() => {
+      if (loaded && loaded.gifs.length > 0) {
+        setImgSrc(loaded.gifs[Math.floor(Math.random() * loaded.gifs.length)]);
+        setQuote(loaded.quotes[Math.floor(Math.random() * loaded.quotes.length)]);
+      }
+    }, 10000);
+
+    return () => clearInterval(intervalId);
   }, []);
 
   // Listen for storage changes (if admin updates while this tab is open)

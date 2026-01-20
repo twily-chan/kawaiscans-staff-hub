@@ -16,6 +16,9 @@ const roleColors = {
 };
 
 export const StaffCard: React.FC<StaffCardProps> = ({ staff }) => {
+  // If no avatarUrl is set, use a deterministic DiceBear URL based on the staff ID or name
+  const avatarSrc = staff.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${staff.id}`;
+
   return (
     <div className="relative group">
       {/* Background Offset decoration */}
@@ -29,9 +32,12 @@ export const StaffCard: React.FC<StaffCardProps> = ({ staff }) => {
            
            <div className="absolute -bottom-10 left-4">
              <img 
-               src={staff.avatarUrl} 
+               src={avatarSrc} 
                alt={staff.name} 
                className="w-24 h-24 rounded-none border-4 border-black bg-white object-cover"
+               onError={(e) => {
+                 (e.target as HTMLImageElement).src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${staff.id}`;
+               }}
              />
            </div>
            

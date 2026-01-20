@@ -1,8 +1,40 @@
 import React, { useState } from 'react';
 import { Menu, X } from 'lucide-react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 
 export const FunkyHeader: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const handleNav = (item: string) => {
+    setIsMenuOpen(false);
+    
+    if (item === 'Home') {
+      if (location.pathname !== '/') {
+        navigate('/');
+        window.scrollTo(0, 0);
+      } else {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    } else if (item === 'Staff' || item === 'Hobbies') {
+      // Prompt requirement: Staff and Hobbies display "all in one".
+      // We scroll to the section with id="staff" which contains both.
+      if (location.pathname !== '/') {
+        // Navigate to home then scroll
+        navigate('/');
+        setTimeout(() => {
+          const el = document.getElementById('staff');
+          if (el) el.scrollIntoView({ behavior: 'smooth' });
+        }, 100);
+      } else {
+        const el = document.getElementById('staff');
+        if (el) el.scrollIntoView({ behavior: 'smooth' });
+      }
+    } else if (item === 'Apply') {
+      navigate('/apply');
+    }
+  };
 
   const navItems = ['Home', 'Staff', 'Hobbies', 'Apply'];
 
@@ -10,7 +42,10 @@ export const FunkyHeader: React.FC = () => {
     <>
       <nav className="sticky top-0 z-50 w-full bg-kawai-dark border-b-4 border-black p-4">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
-          <div className="flex items-center gap-3 group cursor-pointer z-50">
+          <div 
+            className="flex items-center gap-3 group cursor-pointer z-50"
+            onClick={() => handleNav('Home')}
+          >
             {/* Logo container with animated GIF */}
             <div className="relative w-12 h-12 bg-kawai-pink border-2 border-white shadow-[4px_4px_0px_0px_#00FFFF] group-hover:translate-y-1 group-hover:shadow-[2px_2px_0px_0px_#00FFFF] transition-all overflow-hidden">
               <img 
@@ -29,6 +64,7 @@ export const FunkyHeader: React.FC = () => {
             {navItems.map((item) => (
               <button 
                 key={item}
+                onClick={() => handleNav(item)}
                 className="font-display text-xl text-white hover:text-kawai-yellow transition-colors relative after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-1 after:bg-kawai-cyan after:transition-all hover:after:w-full"
               >
                 {item.toUpperCase()}
@@ -57,7 +93,7 @@ export const FunkyHeader: React.FC = () => {
         {navItems.map((item, idx) => (
           <button 
             key={item}
-            onClick={() => setIsMenuOpen(false)}
+            onClick={() => handleNav(item)}
             className="font-display text-5xl text-white hover:text-kawai-cyan transition-colors transform hover:scale-110 hover:rotate-2"
             style={{ transitionDelay: `${idx * 50}ms` }}
           >

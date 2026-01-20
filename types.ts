@@ -1,6 +1,6 @@
 export interface Hobby {
   name: string;
-  category: 'Creative' | 'Active' | 'Chill' | 'Tech' | 'Otaku';
+  category: string;
 }
 
 export interface StaffMember {
