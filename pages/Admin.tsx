@@ -16,8 +16,7 @@ export default function Admin() {
   const [newCategory, setNewCategory] = useState('');
 
   // Authorized emails from env
-  // Fix: Cast import.meta to any to resolve missing type definition for env
-  const adminEmails = ((import.meta as any).env.VITE_ADMIN_EMAILS || '').split(',');
+  const adminEmails = (import.meta.env.VITE_ADMIN_EMAILS || '').split(',');
 
   useEffect(() => {
     // Load initial data
@@ -67,12 +66,11 @@ export const INITIAL_STAFF: StaffMember[] = ${JSON.stringify(staffList, null, 2)
 export const INITIAL_MASCOT: MascotData = ${JSON.stringify(mascotData, null, 2)};
 `;
 
-      // Fix: Cast import.meta to any for env usage
-      const response = await fetch(`https://api.github.com/repos/${(import.meta as any).env.VITE_GITHUB_REPO}/dispatches`, {
+      const response = await fetch(`https://api.github.com/repos/${import.meta.env.VITE_GITHUB_REPO}/dispatches`, {
         method: 'POST',
         headers: {
           Accept: 'application/vnd.github.v3+json',
-          Authorization: `token ${(import.meta as any).env.VITE_GITHUB_TOKEN}`,
+          Authorization: `token ${import.meta.env.VITE_GITHUB_TOKEN}`,
         },
         body: JSON.stringify({
           event_type: 'update_data',

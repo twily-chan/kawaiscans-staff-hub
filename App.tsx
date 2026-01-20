@@ -8,8 +8,7 @@ import NotFound from './pages/NotFound';
 export default function App() {
   // We use BrowserRouter now for clean URLs.
   // The 'basename' is automatically set from vite.config.ts (which reads your repo name).
-  // Fix: Cast import.meta to any to resolve missing type definition for env
-  const baseUrl = (import.meta as any).env.BASE_URL;
+  const baseUrl = import.meta.env.BASE_URL;
 
   return (
     <BrowserRouter basename={baseUrl}>

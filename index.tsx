@@ -8,8 +8,7 @@ if (!rootElement) {
   throw new Error("Could not find root element to mount to");
 }
 
-// Fix: Cast import.meta to any to resolve missing type definition for env
-const clientId = (import.meta as any).env.VITE_GOOGLE_CLIENT_ID || "";
+const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || "";
 
 const root = ReactDOM.createRoot(rootElement);
 root.render(
