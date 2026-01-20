@@ -4,7 +4,7 @@ import { jwtDecode } from 'jwt-decode';
 import { Link } from 'react-router-dom';
 import { getStaffData, saveStaffData, getMascotData, saveMascotData, getHobbyCategories, saveHobbyCategories } from '../utils/storage';
 import { StaffMember, MascotData, Role } from '../types';
-import { Trash2, Save, UploadCloud, Plus, RefreshCw, LogOut, Dices, X, AlertTriangle, Key, ShieldCheck, Server } from 'lucide-react';
+import { Trash2, Save, UploadCloud, Plus, RefreshCw, LogOut, Dices, X, AlertTriangle, Key, ShieldCheck, Server, Image as ImageIcon, MessageCircle } from 'lucide-react';
 
 export default function Admin() {
   const [user, setUser] = useState<any>(null);
@@ -15,6 +15,10 @@ export default function Admin() {
   const [statusMsg, setStatusMsg] = useState<{type: 'success' | 'error' | 'info', text: string} | null>(null);
   const [newCategory, setNewCategory] = useState('');
   
+  // New State for Mascot Inputs
+  const [newGif, setNewGif] = useState('');
+  const [newQuote, setNewQuote] = useState('');
+
   // Token management state
   const [githubToken, setGithubToken] = useState('');
   const [showTokenInput, setShowTokenInput] = useState(false);
@@ -149,6 +153,29 @@ export const INITIAL_MASCOT: MascotData = ${JSON.stringify(mascotData, null, 2)}
     }
   };
 
+  // ---- MASCOT HELPERS ----
+  const addGif = () => {
+    if (newGif.trim()) {
+      setMascotData(prev => ({...prev, gifs: [...prev.gifs, newGif.trim()]}));
+      setNewGif('');
+    }
+  };
+
+  const removeGif = (idx: number) => {
+    setMascotData(prev => ({...prev, gifs: prev.gifs.filter((_, i) => i !== idx)}));
+  };
+
+  const addQuote = () => {
+    if (newQuote.trim()) {
+      setMascotData(prev => ({...prev, quotes: [...prev.quotes, newQuote.trim()]}));
+      setNewQuote('');
+    }
+  };
+
+  const removeQuote = (idx: number) => {
+    setMascotData(prev => ({...prev, quotes: prev.quotes.filter((_, i) => i !== idx)}));
+  };
+
   // ---- STAFF EDITING HELPERS ----
   const updateStaff = (id: string, field: keyof StaffMember, value: any) => {
     setStaffList(prev => prev.map(s => s.id === id ? { ...s, [field]: value } : s));
@@ -161,8 +188,6 @@ export const INITIAL_MASCOT: MascotData = ${JSON.stringify(mascotData, null, 2)}
         const newRoles = currentRoles.includes(role) 
           ? currentRoles.filter(r => r !== role) 
           : [...currentRoles, role];
-        
-        // Ensure at least one role is present if needed, or handle empty logic
         return { ...s, roles: newRoles };
       }
       return s;
@@ -330,31 +355,99 @@ export const INITIAL_MASCOT: MascotData = ${JSON.stringify(mascotData, null, 2)}
            )}
         </div>
 
-        {/* HOBBY CATEGORY CONFIG */}
-        <div className="bg-white p-6 border-4 border-black">
-          <h2 className="text-3xl font-display mb-6 border-b-2 border-gray-200 pb-2">Hobby Categories</h2>
-          <p className="text-sm text-gray-500 mb-4">Manage the categories available for staff hobbies. These are used in the charts.</p>
-          
-          <div className="flex flex-wrap gap-2 mb-4">
-             {hobbyCategories.map(cat => (
-               <span key={cat} className="bg-gray-100 border border-black px-3 py-1 flex items-center gap-2 font-bold text-sm">
-                 {cat}
-                 <button onClick={() => removeCategory(cat)} className="text-red-500 hover:text-red-700"><X size={14}/></button>
-               </span>
-             ))}
-          </div>
+        {/* --- GLOBAL CONFIGURATION GRID --- */}
+        <div className="grid md:grid-cols-2 gap-8">
+            
+            {/* HOBBY CATEGORY CONFIG */}
+            <div className="bg-white p-6 border-4 border-black">
+              <h2 className="text-3xl font-display mb-6 border-b-2 border-gray-200 pb-2">Hobby Categories</h2>
+              <div className="flex flex-wrap gap-2 mb-4">
+                 {hobbyCategories.map(cat => (
+                   <span key={cat} className="bg-gray-100 border border-black px-3 py-1 flex items-center gap-2 font-bold text-sm">
+                     {cat}
+                     <button onClick={() => removeCategory(cat)} className="text-red-500 hover:text-red-700"><X size={14}/></button>
+                   </span>
+                 ))}
+              </div>
+              <div className="flex gap-2">
+                 <input 
+                   type="text" 
+                   className="border-2 border-gray-300 p-2 w-full" 
+                   placeholder="New Category..." 
+                   value={newCategory} 
+                   onChange={(e) => setNewCategory(e.target.value)}
+                   onKeyDown={(e) => e.key === 'Enter' && addCategory()}
+                 />
+                 <button onClick={addCategory} className="bg-kawai-cyan border-2 border-black px-4 font-bold hover:bg-cyan-300">ADD</button>
+              </div>
+            </div>
 
-          <div className="flex gap-2 max-w-sm">
-             <input 
-               type="text" 
-               className="border-2 border-gray-300 p-2 w-full" 
-               placeholder="New Category..." 
-               value={newCategory} 
-               onChange={(e) => setNewCategory(e.target.value)}
-               onKeyDown={(e) => e.key === 'Enter' && addCategory()}
-             />
-             <button onClick={addCategory} className="bg-kawai-cyan border-2 border-black px-4 font-bold hover:bg-cyan-300">ADD</button>
-          </div>
+            {/* MASCOT CONFIG */}
+            <div className="bg-white p-6 border-4 border-black space-y-4">
+               <h2 className="text-3xl font-display mb-6 border-b-2 border-gray-200 pb-2">Mascot Settings</h2>
+               
+               {/* Fallback Image */}
+               <div>
+                  <label className="text-sm font-bold text-gray-500 block mb-1">Fallback Image URL</label>
+                  <input 
+                    className="w-full border-2 border-gray-300 p-2 text-sm" 
+                    value={mascotData.fallbackImage}
+                    onChange={(e) => setMascotData({...mascotData, fallbackImage: e.target.value})}
+                  />
+               </div>
+
+               {/* GIFs Manager */}
+               <div>
+                  <label className="text-sm font-bold text-gray-500 block mb-1 flex items-center gap-2">
+                     <ImageIcon size={16} /> Mascot GIFs/Images ({mascotData.gifs.length})
+                  </label>
+                  <div className="max-h-32 overflow-y-auto border border-gray-200 p-2 mb-2 bg-gray-50">
+                     {mascotData.gifs.map((gif, idx) => (
+                        <div key={idx} className="flex gap-2 items-center mb-1 bg-white p-1 border">
+                           <img src={gif} alt="preview" className="w-6 h-6 object-cover border border-black" />
+                           <span className="text-xs truncate flex-1">{gif}</span>
+                           <button onClick={() => removeGif(idx)} className="text-red-500 hover:text-red-700"><X size={14}/></button>
+                        </div>
+                     ))}
+                  </div>
+                  <div className="flex gap-2">
+                     <input 
+                       className="border-2 border-gray-300 p-1 w-full text-xs" 
+                       placeholder="https://... (GIF/PNG)" 
+                       value={newGif}
+                       onChange={(e) => setNewGif(e.target.value)}
+                       onKeyDown={(e) => e.key === 'Enter' && addGif()}
+                     />
+                     <button onClick={addGif} className="bg-kawai-pink text-white border-2 border-black px-3 font-bold text-xs hover:bg-pink-400">ADD</button>
+                  </div>
+               </div>
+
+               {/* Quotes Manager */}
+               <div>
+                  <label className="text-sm font-bold text-gray-500 block mb-1 flex items-center gap-2">
+                     <MessageCircle size={16} /> Random Quotes ({mascotData.quotes.length})
+                  </label>
+                  <div className="max-h-32 overflow-y-auto border border-gray-200 p-2 mb-2 bg-gray-50">
+                     {mascotData.quotes.map((q, idx) => (
+                        <div key={idx} className="flex gap-2 items-center mb-1 bg-white p-1 border">
+                           <span className="text-xs truncate flex-1">"{q}"</span>
+                           <button onClick={() => removeQuote(idx)} className="text-red-500 hover:text-red-700"><X size={14}/></button>
+                        </div>
+                     ))}
+                  </div>
+                  <div className="flex gap-2">
+                     <input 
+                       className="border-2 border-gray-300 p-1 w-full text-xs" 
+                       placeholder="New Quote..." 
+                       value={newQuote}
+                       onChange={(e) => setNewQuote(e.target.value)}
+                       onKeyDown={(e) => e.key === 'Enter' && addQuote()}
+                     />
+                     <button onClick={addQuote} className="bg-kawai-yellow text-black border-2 border-black px-3 font-bold text-xs hover:bg-yellow-400">ADD</button>
+                  </div>
+               </div>
+
+            </div>
         </div>
 
         {/* STAFF SECTION */}

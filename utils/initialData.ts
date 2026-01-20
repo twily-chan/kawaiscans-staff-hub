@@ -1,9 +1,8 @@
-
 import { StaffMember, MascotData } from '../types';
 
 // Update this version number whenever you push new changes to GitHub!
 // This forces visitors' browsers to load the new data instead of their old cached copy.
-export const DATA_VERSION = '1768914546976';
+export const DATA_VERSION = '1.2.1-FIX';
 
 export const INITIAL_HOBBY_CATEGORIES = [
   "Active",
@@ -11,14 +10,16 @@ export const INITIAL_HOBBY_CATEGORIES = [
   "Otaku",
   "Lolicon",
   "Weeb",
-  "Cringe"
+  "Cringe",
+  "Creative",
+  "Tech"
 ];
 
 export const INITIAL_STAFF: StaffMember[] = [
   {
     "id": "1",
     "name": "Carrot ",
-    "role": "Leader",
+    "roles": ["Leader"],
     "avatarUrl": "https://media1.tenor.com/m/vORI9e-AqoUAAAAC/menhera-chan-chibi.gif",
     "bio": "yeah i started it all but i don't know who will finish it.",
     "favManga": "Kubo",
@@ -46,7 +47,7 @@ export const INITIAL_STAFF: StaffMember[] = [
   {
     "id": "2",
     "name": "Houjicha",
-    "role": "Translator",
+    "roles": ["Translator"],
     "avatarUrl": "https://media.tenor.com/tLqhlbuMdXoAAAAi/duong2.gif",
     "bio": "I'm gay i don't know why i joined i slack around all the time.",
     "favManga": "One-Room Ta",
@@ -70,7 +71,7 @@ export const INITIAL_STAFF: StaffMember[] = [
   {
     "id": "3",
     "name": "Kombucha ",
-    "role": "Redrawer",
+    "roles": ["Redrawer"],
     "avatarUrl": "https://media.tenor.com/-LgKbMFgUWoAAAAi/vulpisfoglia-cry.gif",
     "bio": "I'm a pumpkin in real life too.",
     "favManga": "Fragrant Flowers",
@@ -98,7 +99,7 @@ export const INITIAL_STAFF: StaffMember[] = [
   {
     "id": "4",
     "name": "Yuuki",
-    "role": "Typesetter",
+    "roles": ["Typesetter"],
     "avatarUrl": "https://media.tenor.com/jaX_i8ry6AQAAAAi/enterprise-confused.gif",
     "bio": "I'm an old member but i still don't like to work i make fake excuses everytime",
     "favManga": "Yotsuba",
@@ -113,111 +114,7 @@ export const INITIAL_STAFF: StaffMember[] = [
       },
       {
         "name": "Reading",
-        "category": "Lolicon"
-      }
-    ],
-    "powerLevel": 6800,
-    "coffeeConsumption": 3
-  },
-  {
-    "id": "1768913155413",
-    "name": "Azasapag",
-    "role": "Translator",
-    "avatarUrl": "https://media.tenor.com/Ru5PhSjAJ3gAAAAi/hikari-shupogaki.gif",
-    "bio": "I'm new here I'm from Indonesia but I'm currently living in Japan ",
-    "favManga": "Uma Musume ",
-    "hobbies": [
-      {
-        "name": "Reading ",
-        "category": "Active"
-      },
-      {
-        "name": "Translating ",
-        "category": "Lolicon"
-      },
-      {
-        "name": "Gooning ",
-        "category": "Otaku"
-      },
-      {
-        "name": "Sleeping ",
-        "category": "Weeb"
-      }
-    ],
-    "powerLevel": 5000,
-    "coffeeConsumption": 1
-  },
-  {
-    "id": "1768913707622",
-    "name": "Risrock",
-    "role": "Redrawer",
-    "avatarUrl": "https://media.tenor.com/1qQAPvpu2FwAAAAi/shinky-id.gif",
-    "bio": "I'm just a normal cleaner and redrawer I love reading manga's and stuff.",
-    "favManga": "One piece ",
-    "hobbies": [
-      {
-        "name": "Reading ",
-        "category": "Active"
-      },
-      {
-        "name": "Cleaning ",
-        "category": "Otaku"
-      },
-      {
-        "name": "Drawing ",
-        "category": "Weeb"
-      },
-      {
-        "name": "Sleeping ",
-        "category": "Cringe"
-      }
-    ],
-    "powerLevel": 5000,
-    "coffeeConsumption": 1
-  },
-  {
-    "id": "1768913873671",
-    "name": "Chen",
-    "role": "Redrawer",
-    "avatarUrl": "https://media1.tenor.com/m/PVwkr8OVipEAAAAC/my-dress-up-darling-marin-kitagawa.gif",
-    "bio": "I'm a digital artist i love drawing stuff.",
-    "favManga": "Angel next door ",
-    "hobbies": [
-      {
-        "name": "Artist ",
-        "category": "Weeb"
-      },
-      {
-        "name": "Drawing ",
-        "category": "Active"
-      },
-      {
-        "name": "Sleeping ",
-        "category": "Otaku"
-      }
-    ],
-    "powerLevel": 5000,
-    "coffeeConsumption": 1
-  },
-  {
-    "id": "1768914359868",
-    "name": "Blood",
-    "role": "Typesetter",
-    "avatarUrl": "https://media1.tenor.com/m/7mGmw-GJs4IAAAAC/rage-power.gif",
-    "bio": "I'm a new member of this group also in ts as well as a workless person cuz everytime i get work, I bing it it in an hour or two, then again start yapping \" I need more work\".",
-    "favManga": "Manga name",
-    "hobbies": [
-      {
-        "name": "Work ",
-        "category": "Weeb"
-      },
-      {
-        "name": "Work",
-        "category": "Active"
-      },
-      {
-        "name": "Work",
-        "category": "Otaku"
+        "category": "Chill"
       }
     ],
     "powerLevel": 5000,
@@ -226,18 +123,15 @@ export const INITIAL_STAFF: StaffMember[] = [
 ];
 
 export const INITIAL_MASCOT: MascotData = {
-  "gifs": [
+  gifs: [
     "https://media1.tenor.com/m/wr2bCL53YR8AAAAd/kubo-san-anime.gif",
-    "https://media1.tenor.com/m/f37213_CgacAAAAd/kubo-nagisa-kubo-san-wa-mob-wo-yurusanai.gif",
-    "https://media1.tenor.com/m/Wj4j2Z1t3VQAAAAd/kubo-san-kubo-nagisa.gif"
+    "https://media.tenor.com/tLqhlbuMdXoAAAAi/duong2.gif"
   ],
-  "quotes": [
-    "Don't forget to hydrate!",
-    "Is that a new chapter? Nope, just me.",
-    "Ganbatte!",
-    "Scanlation is art!",
-    "Did you check for typos?",
-    "Deadline approaching!"
+  quotes: [
+    "Kubo is watching!",
+    "Did you translate today?",
+    "Caffeine level critical!",
+    "Where is the raw provider?"
   ],
-  "fallbackImage": "https://media1.tenor.com/m/wr2bCL53YR8AAAAd/kubo-san-anime.gif"
+  fallbackImage: "https://media1.tenor.com/m/wr2bCL53YR8AAAAd/kubo-san-anime.gif"
 };
