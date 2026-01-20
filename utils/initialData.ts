@@ -3,7 +3,7 @@ import { StaffMember, MascotData } from '../types';
 
 // Update this version number whenever you push new changes to GitHub!
 // This forces visitors' browsers to load the new data instead of their old cached copy.
-export const DATA_VERSION = '1768921107158';
+export const DATA_VERSION = '1768921727767';
 
 export const INITIAL_HOBBY_CATEGORIES = [
   "Active",
@@ -80,7 +80,7 @@ export const INITIAL_STAFF: StaffMember[] = [
     ],
     "avatarUrl": "https://media.tenor.com/-LgKbMFgUWoAAAAi/vulpisfoglia-cry.gif",
     "bio": "I'm a pumpkin in real life too.",
-    "favManga": "Fragrant Flowers",
+    "favManga": "Friday night funkin",
     "hobbies": [
       {
         "name": "Digital Art",
@@ -135,24 +135,24 @@ export const INITIAL_STAFF: StaffMember[] = [
       "Translator"
     ],
     "avatarUrl": "https://media.tenor.com/Ru5PhSjAJ3gAAAAi/hikari-shupogaki.gif",
-    "bio": "Hey there I'm new I'm from Indonesia but currently I'm living in Japan.",
-    "favManga": "Uma Musume ",
+    "bio": " Hey there I'm from Indonesia Currently living in Japan to find a Japanese girlfriend.",
+    "favManga": "Fake touhou",
     "hobbies": [
       {
         "name": "Reading ",
         "category": "Active"
       },
       {
-        "name": "Gaming ",
-        "category": "Active"
-      },
-      {
         "name": "Gooning ",
-        "category": "Active"
+        "category": "Lolicon"
       },
       {
         "name": "Sleeping ",
         "category": "Active"
+      },
+      {
+        "name": "Gaming ",
+        "category": "Weeb"
       }
     ],
     "powerLevel": 5000,
