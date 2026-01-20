@@ -3,7 +3,7 @@ import { StaffMember, MascotData } from '../types';
 
 // Update this version number whenever you push new changes to GitHub!
 // This forces visitors' browsers to load the new data instead of their old cached copy.
-export const DATA_VERSION = '1768912399792';
+export const DATA_VERSION = '1768912632820';
 
 export const INITIAL_HOBBY_CATEGORIES = [
   "Active",
