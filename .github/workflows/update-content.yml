@@ -4,11 +4,21 @@ on:
   repository_dispatch:
     types: [update_data]
 
+# Permissions: 'contents: write' to commit the file, 'pages/id-token' to deploy the site
 permissions:
   contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
 
 jobs:
   update-and-deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
@@ -29,11 +39,13 @@ jobs:
           git config user.name "Kawaiscans Bot"
           git config user.email "bot@kawaiscans.com"
           git add utils/initialData.ts
+          # The '|| echo' prevents failure if there are no changes
           git commit -m "🤖 Auto-update data via Admin Panel" || echo "No changes to commit"
           git pull --rebase origin main
           git push origin main
 
-      # We trigger the build immediately here so you don't have to wait for the other workflow
+      # --- DEPLOYMENT STEPS START HERE ---
+
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
@@ -50,9 +62,16 @@ jobs:
           VITE_GITHUB_REPO: ${{ secrets.VITE_GITHUB_REPO }}
         run: |
           npm run build
+          cp dist/index.html dist/404.html
           touch dist/.nojekyll
 
-      - name: Deploy to GitHub Pages
-        uses: JamesIves/github-pages-deploy-action@v4
+      # Replaced JamesIves with the official artifact uploader
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
         with:
-          folder: dist
+          path: './dist'
+
+      # Replaced JamesIves with the official deployer
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
