@@ -3,7 +3,7 @@ import { StaffMember, MascotData } from '../types';
 
 // Update this version number whenever you push new changes to GitHub!
 // This forces visitors' browsers to load the new data instead of their old cached copy.
-export const DATA_VERSION = '1768907602732';
+export const DATA_VERSION = '1768908560706';
 
 export const INITIAL_HOBBY_CATEGORIES = [
   "Creative",
@@ -36,7 +36,7 @@ export const INITIAL_STAFF: StaffMember[] = [
   },
   {
     "id": "2",
-    "name": "Shira-TL",
+    "name": "Hisdjaigj",
     "role": "Translator",
     "avatarUrl": "https://api.dicebear.com/7.x/avataaars/svg?seed=Shiraishi",
     "bio": "Can translate sound effects into pure emotion.",
@@ -56,7 +56,7 @@ export const INITIAL_STAFF: StaffMember[] = [
   },
   {
     "id": "3",
-    "name": "Pixel-Redraw",
+    "name": "jnsajgnasg",
     "role": "Redrawer",
     "avatarUrl": "https://api.dicebear.com/7.x/avataaars/svg?seed=Pixel",
     "bio": "Removing text from complicated backgrounds is my passion (and nightmare).",
