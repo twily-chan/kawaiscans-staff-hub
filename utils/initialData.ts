@@ -3,7 +3,7 @@ import { StaffMember, MascotData } from '../types';
 
 // Update this version number whenever you push new changes to GitHub!
 // This forces visitors' browsers to load the new data instead of their old cached copy.
-export const DATA_VERSION = '1768922016638';
+export const DATA_VERSION = '1768922284330';
 
 export const INITIAL_HOBBY_CATEGORIES = [
   "Active",
@@ -79,7 +79,7 @@ export const INITIAL_STAFF: StaffMember[] = [
       "Redrawer"
     ],
     "avatarUrl": "https://media.tenor.com/-LgKbMFgUWoAAAAi/vulpisfoglia-cry.gif",
-    "bio": "I'm a pumpkin in real life too.",
+    "bio": "I live in my little house of memories.",
     "favManga": "Friday night funkin",
     "hobbies": [
       {
@@ -179,6 +179,32 @@ export const INITIAL_STAFF: StaffMember[] = [
       {
         "name": "Work",
         "category": "Active"
+      }
+    ],
+    "powerLevel": 5000,
+    "coffeeConsumption": 1
+  },
+  {
+    "id": "1768922154226",
+    "name": "Chen",
+    "roles": [
+      "Redrawer"
+    ],
+    "avatarUrl": "https://media1.tenor.com/m/PVwkr8OVipEAAAAC/my-dress-up-darling-marin-kitagawa.gif",
+    "bio": "Heya I'm an artist I like digital drawing and stuff.",
+    "favManga": "Angel next door ",
+    "hobbies": [
+      {
+        "name": "Artist ",
+        "category": "Active"
+      },
+      {
+        "name": "Drawing ",
+        "category": "Active"
+      },
+      {
+        "name": "Sleeping ",
+        "category": "Weeb"
       }
     ],
     "powerLevel": 5000,
