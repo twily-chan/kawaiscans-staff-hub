@@ -1,0 +1,53 @@
+name: Automated Content Update
+
+on:
+  repository_dispatch:
+    types: [update_data]
+
+permissions:
+  contents: write
+
+jobs:
+  update-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Overwrite Data File
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const content = context.payload.client_payload.content;
+            fs.writeFileSync('utils/initialData.ts', content);
+
+      - name: Commit and Push Changes
+        run: |
+          git config user.name "Kawaiscans Bot"
+          git config user.email "bot@kawaiscans.com"
+          git add utils/initialData.ts
+          git commit -m "🤖 Auto-update data via Admin Panel" || echo "No changes to commit"
+          git push
+
+      # We trigger the build immediately here so you don't have to wait for the other workflow
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build Project
+        env:
+          VITE_GOOGLE_CLIENT_ID: ${{ secrets.VITE_GOOGLE_CLIENT_ID }}
+          VITE_ADMIN_EMAIL: ${{ secrets.VITE_ADMIN_EMAIL }}
+        run: |
+          npm run build
+          touch dist/.nojekyll
+
+      - name: Deploy to GitHub Pages
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: dist
