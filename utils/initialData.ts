@@ -3,7 +3,7 @@ import { StaffMember, MascotData } from '../types';
 
 // Update this version number whenever you push new changes to GitHub!
 // This forces visitors' browsers to load the new data instead of their old cached copy.
-export const DATA_VERSION = '1768910522935';
+export const DATA_VERSION = '1768910679913';
 
 export const INITIAL_HOBBY_CATEGORIES = [
   "Creative",
@@ -56,9 +56,9 @@ export const INITIAL_STAFF: StaffMember[] = [
   },
   {
     "id": "3",
-    "name": "jnsajgnasg",
+    "name": "Kombucha ",
     "role": "Redrawer",
-    "avatarUrl": "https://api.dicebear.com/7.x/avataaars/svg?seed=Pixel",
+    "avatarUrl": "https://cdn.discordapp.com/attachments/1436296684069060681/1450429092674535534/kubo-nagisa-kubo-san-wa-mob-wo-yurusanai_1.gif?ex=6970a55b&is=696f53db&hm=6023bc73ac1f3dd2589f96ce243e8813062e27184ec73eec710205f21f5c3928&",
     "bio": "Removing text from complicated backgrounds is my passion (and nightmare).",
     "favManga": "One Piece",
     "hobbies": [
