@@ -3,8 +3,8 @@ import { GoogleLogin } from '@react-oauth/google';
 import { jwtDecode } from 'jwt-decode';
 import { Link } from 'react-router-dom';
 import { getStaffData, saveStaffData, getMascotData, saveMascotData, getHobbyCategories, saveHobbyCategories } from '../utils/storage';
-import { StaffMember, MascotData } from '../types';
-import { Trash2, Save, UploadCloud, Plus, RefreshCw, LogOut, Dices, X, AlertTriangle, Key } from 'lucide-react';
+import { StaffMember, MascotData, Role } from '../types';
+import { Trash2, Save, UploadCloud, Plus, RefreshCw, LogOut, Dices, X, AlertTriangle, Key, ShieldCheck, Server } from 'lucide-react';
 
 export default function Admin() {
   const [user, setUser] = useState<any>(null);
@@ -19,8 +19,14 @@ export default function Admin() {
   const [githubToken, setGithubToken] = useState('');
   const [showTokenInput, setShowTokenInput] = useState(false);
 
+  // Check for Backend Proxy (Cloudflare Worker)
+  const proxyUrl = import.meta.env.VITE_PROXY_URL;
+  const isUsingBackend = !!proxyUrl;
+
   // Authorized emails from env
   const adminEmails = (import.meta.env.VITE_ADMIN_EMAILS || '').split(',');
+
+  const ALL_ROLES: Role[] = ['Leader', 'Translator', 'Redrawer', 'Typesetter', 'Quality Check', 'Raw Provider', 'Proofreader', 'Moderator'];
 
   useEffect(() => {
     // Load initial data
@@ -28,7 +34,7 @@ export default function Admin() {
     setMascotData(getMascotData());
     setHobbyCategories(getHobbyCategories());
 
-    // Load token from local storage if exists
+    // Load token from local storage if exists (Only needed if NOT using backend)
     const storedToken = localStorage.getItem('kawai_gh_token');
     if (storedToken) {
       setGithubToken(storedToken);
@@ -68,7 +74,8 @@ export default function Admin() {
   };
 
   const handlePushToGithub = async () => {
-    if (!githubToken) {
+    // If NOT using backend, we need a token
+    if (!isUsingBackend && !githubToken) {
       setShowTokenInput(true);
       setStatusMsg({ type: 'error', text: 'Please enter your GitHub Token first.' });
       return;
@@ -93,31 +100,45 @@ export const INITIAL_STAFF: StaffMember[] = ${JSON.stringify(staffList, null, 2)
 export const INITIAL_MASCOT: MascotData = ${JSON.stringify(mascotData, null, 2)};
 `;
 
-      const response = await fetch(`https://api.github.com/repos/${import.meta.env.VITE_GITHUB_REPO}/dispatches`, {
-        method: 'POST',
-        headers: {
-          Accept: 'application/vnd.github.v3+json',
-          Authorization: `token ${githubToken}`,
-        },
-        body: JSON.stringify({
-          event_type: 'update_data',
-          client_payload: { content: fileContent },
-        }),
-      });
+      let response;
+
+      if (isUsingBackend && proxyUrl) {
+         // --- OPTION A: SECURE BACKEND (Cloudflare Worker) ---
+         // We send the content to our worker. The worker adds the token and calls GitHub.
+         response = await fetch(proxyUrl, {
+           method: 'POST',
+           headers: { 'Content-Type': 'application/json' },
+           body: JSON.stringify({ content: fileContent })
+         });
+      } else {
+         // --- OPTION B: CLIENT SIDE (Legacy/Fallback) ---
+         // We call GitHub directly using the token in LocalStorage
+         response = await fetch(`https://api.github.com/repos/${import.meta.env.VITE_GITHUB_REPO}/dispatches`, {
+          method: 'POST',
+          headers: {
+            Accept: 'application/vnd.github.v3+json',
+            Authorization: `token ${githubToken}`,
+          },
+          body: JSON.stringify({
+            event_type: 'update_data',
+            client_payload: { content: fileContent },
+          }),
+        });
+      }
 
       if (response.ok) {
         setStatusMsg({ type: 'success', text: 'SUCCESS! GitHub is rebuilding the site. Wait ~2 mins.' });
       } else {
         const errorText = await response.text();
-        console.error('GitHub Error:', errorText);
+        console.error('API Error:', errorText);
         
         if (response.status === 401) {
-           setStatusMsg({ type: 'error', text: 'ERROR: Invalid Token (401). Update your token.' });
-           setShowTokenInput(true);
+           setStatusMsg({ type: 'error', text: 'ERROR: Authentication Failed (401). Check Token/Backend.' });
+           if (!isUsingBackend) setShowTokenInput(true);
         } else if (response.status === 404) {
-           setStatusMsg({ type: 'error', text: 'ERROR: Repo not found (404). Check VITE_GITHUB_REPO env var.' });
+           setStatusMsg({ type: 'error', text: 'ERROR: Repo not found (404).' });
         } else {
-           setStatusMsg({ type: 'error', text: `ERROR: ${response.status} - Check console.` });
+           setStatusMsg({ type: 'error', text: `ERROR: ${response.status} - ${errorText}` });
         }
       }
     } catch (error: any) {
@@ -131,6 +152,21 @@ export const INITIAL_MASCOT: MascotData = ${JSON.stringify(mascotData, null, 2)}
   // ---- STAFF EDITING HELPERS ----
   const updateStaff = (id: string, field: keyof StaffMember, value: any) => {
     setStaffList(prev => prev.map(s => s.id === id ? { ...s, [field]: value } : s));
+  };
+
+  const toggleRole = (staffId: string, role: Role) => {
+    setStaffList(prev => prev.map(s => {
+      if (s.id === staffId) {
+        const currentRoles = s.roles || [];
+        const newRoles = currentRoles.includes(role) 
+          ? currentRoles.filter(r => r !== role) 
+          : [...currentRoles, role];
+        
+        // Ensure at least one role is present if needed, or handle empty logic
+        return { ...s, roles: newRoles };
+      }
+      return s;
+    }));
   };
 
   const addHobby = (staffId: string) => {
@@ -172,7 +208,7 @@ export const INITIAL_MASCOT: MascotData = ${JSON.stringify(mascotData, null, 2)}
     const newStaff: StaffMember = {
       id: Date.now().toString(),
       name: 'New Staff',
-      role: 'Quality Check',
+      roles: ['Quality Check'],
       avatarUrl: 'https://api.dicebear.com/7.x/avataaars/svg?seed=' + Date.now(),
       bio: 'Bio goes here...',
       favManga: 'Manga name',
@@ -246,13 +282,20 @@ export const INITIAL_MASCOT: MascotData = ${JSON.stringify(mascotData, null, 2)}
              </div>
              
              <div className="flex gap-4">
-               {/* Token Button */}
-               <button 
-                 onClick={() => setShowTokenInput(!showTokenInput)} 
-                 className={`flex items-center gap-2 px-3 py-2 border-2 border-black font-bold text-sm ${githubToken ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}
-               >
-                 <Key size={16} /> {githubToken ? 'Token Active' : 'Set Token'}
-               </button>
+               {/* Backend Status Indicator */}
+               {isUsingBackend ? (
+                  <div className="flex items-center gap-2 px-3 py-2 bg-green-100 text-green-700 border-2 border-green-600 font-bold text-sm" title="Using Cloudflare Worker Proxy">
+                    <ShieldCheck size={16} /> Backend Active
+                  </div>
+               ) : (
+                  <button 
+                    onClick={() => setShowTokenInput(!showTokenInput)} 
+                    className={`flex items-center gap-2 px-3 py-2 border-2 border-black font-bold text-sm ${githubToken ? 'bg-yellow-100 text-yellow-700' : 'bg-red-100 text-red-700'}`}
+                    title="Using Local Browser Storage (Fallback)"
+                  >
+                    <Key size={16} /> {githubToken ? 'Token (Local)' : 'Set Token'}
+                  </button>
+               )}
 
                <button onClick={handleSaveLocal} className="flex items-center gap-2 px-4 py-2 bg-white border-2 border-black hover:bg-gray-100 font-bold">
                  <Save size={18} /> Save Local
@@ -263,8 +306,8 @@ export const INITIAL_MASCOT: MascotData = ${JSON.stringify(mascotData, null, 2)}
              </div>
            </div>
 
-           {/* Token Input Dropdown */}
-           {showTokenInput && (
+           {/* Token Input Dropdown (Only shows if NO Backend and button clicked) */}
+           {showTokenInput && !isUsingBackend && (
               <div className="w-full bg-gray-100 p-4 border-t-2 border-dashed border-gray-400 flex flex-col gap-2">
                 <p className="text-sm font-bold text-gray-700">GitHub Personal Access Token (PAT):</p>
                 <div className="flex gap-2">
@@ -362,10 +405,20 @@ export const INITIAL_MASCOT: MascotData = ${JSON.stringify(mascotData, null, 2)}
                     <label className="text-xs font-bold text-gray-500">Name</label>
                     <input className="w-full border p-1" value={staff.name} onChange={(e) => updateStaff(staff.id, 'name', e.target.value)} />
                     
-                    <label className="text-xs font-bold text-gray-500">Role</label>
-                    <select className="w-full border p-1" value={staff.role} onChange={(e) => updateStaff(staff.id, 'role', e.target.value)}>
-                       {['Leader', 'Translator', 'Redrawer', 'Typesetter', 'Quality Check', 'Raw Provider'].map(r => <option key={r} value={r}>{r}</option>)}
-                    </select>
+                    <label className="text-xs font-bold text-gray-500">Roles</label>
+                    <div className="w-full border p-2 bg-white flex flex-wrap gap-2 max-h-32 overflow-y-auto">
+                      {ALL_ROLES.map(role => (
+                        <label key={role} className="flex items-center gap-1 text-xs cursor-pointer bg-gray-100 px-2 py-1 border border-gray-200 hover:bg-gray-200">
+                          <input 
+                            type="checkbox" 
+                            checked={staff.roles.includes(role)} 
+                            onChange={() => toggleRole(staff.id, role)}
+                            className="accent-kawai-pink"
+                          />
+                          {role}
+                        </label>
+                      ))}
+                    </div>
                   </div>
 
                   <div className="space-y-2">

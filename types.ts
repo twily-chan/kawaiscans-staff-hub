@@ -3,10 +3,12 @@ export interface Hobby {
   category: string;
 }
 
+export type Role = 'Leader' | 'Translator' | 'Redrawer' | 'Typesetter' | 'Quality Check' | 'Raw Provider' | 'Proofreader' | 'Moderator';
+
 export interface StaffMember {
   id: string;
   name: string;
-  role: 'Leader' | 'Translator' | 'Redrawer' | 'Typesetter' | 'Quality Check' | 'Raw Provider';
+  roles: Role[];
   avatarUrl: string;
   bio: string;
   favManga: string;

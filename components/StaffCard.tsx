@@ -6,18 +6,24 @@ interface StaffCardProps {
   staff: StaffMember;
 }
 
-const roleColors = {
+const roleColors: Record<string, string> = {
   Leader: 'bg-red-400',
   Translator: 'bg-blue-400',
   Redrawer: 'bg-green-400',
   Typesetter: 'bg-purple-400',
   'Quality Check': 'bg-kawai-pink',
   'Raw Provider': 'bg-gray-500',
+  Proofreader: 'bg-orange-400',
+  Moderator: 'bg-indigo-400',
 };
 
 export const StaffCard: React.FC<StaffCardProps> = ({ staff }) => {
   // If no avatarUrl is set, use a deterministic DiceBear URL based on the staff ID or name
   const avatarSrc = staff.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${staff.id}`;
+  
+  // Use first role for primary color, default to gray if none or unknown
+  const primaryRole = staff.roles[0] || 'Member';
+  const bgColor = roleColors[primaryRole] || 'bg-gray-200';
 
   return (
     <div className="relative group">
@@ -26,7 +32,7 @@ export const StaffCard: React.FC<StaffCardProps> = ({ staff }) => {
       
       <div className="relative bg-white border-4 border-black p-0 h-full flex flex-col transition-transform group-hover:translate-x-1 group-hover:translate-y-1">
         {/* Header / Avatar Area */}
-        <div className={`h-32 ${roleColors[staff.role]} border-b-4 border-black relative overflow-hidden`}>
+        <div className={`h-32 ${bgColor} border-b-4 border-black relative overflow-hidden`}>
            {/* Pattern overlay */}
            <div className="absolute inset-0 opacity-20" style={{backgroundImage: 'radial-gradient(#fff 2px, transparent 2px)', backgroundSize: '8px 8px'}}></div>
            
@@ -41,8 +47,13 @@ export const StaffCard: React.FC<StaffCardProps> = ({ staff }) => {
              />
            </div>
            
-           <div className="absolute top-2 right-2 bg-black text-white px-2 py-1 font-display text-sm -rotate-2">
-             {staff.role.toUpperCase()}
+           {/* Multi-role badges */}
+           <div className="absolute top-2 right-2 flex flex-col items-end gap-1">
+             {staff.roles.map((role) => (
+                <div key={role} className="bg-black text-white px-2 py-0.5 font-display text-sm -rotate-2 shadow-sm border border-white/20">
+                  {role.toUpperCase()}
+                </div>
+             ))}
            </div>
         </div>
 

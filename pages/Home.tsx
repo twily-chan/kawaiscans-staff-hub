@@ -28,7 +28,16 @@ export default function Home() {
     // Auto rotate hero image every 6 seconds
     const interval = setInterval(() => {
       if (loadedMascot && loadedMascot.gifs.length > 0) {
-         setHeroImage(loadedMascot.gifs[Math.floor(Math.random() * loadedMascot.gifs.length)]);
+         // Ensure we pick a new image different from the current one
+         setHeroImage(prev => {
+           let next = prev;
+           let attempts = 0;
+           while (next === prev && attempts < 5) {
+             next = loadedMascot.gifs[Math.floor(Math.random() * loadedMascot.gifs.length)];
+             attempts++;
+           }
+           return next;
+         });
       }
     }, 6000);
 
@@ -36,12 +45,12 @@ export default function Home() {
   }, []);
 
   const roles = staffData.length > 0 
-    ? ['All', ...Array.from(new Set(staffData.map(s => s.role)))] 
+    ? ['All', ...Array.from(new Set(staffData.flatMap(s => s.roles)))] 
     : ['All'];
 
   const filteredStaff = filter === 'All' 
     ? staffData 
-    : staffData.filter(s => s.role === filter);
+    : staffData.filter(s => s.roles.includes(filter as any));
 
   const randomizeHero = () => {
     if (mascotData && mascotData.gifs.length > 0) {
@@ -71,10 +80,10 @@ export default function Home() {
           <div className="md:w-1/2 text-center md:text-left space-y-8">
             <div className="inline-flex items-center gap-3 bg-black text-white px-6 py-3 shadow-[8px_8px_0px_#FF69B4] hover:shadow-[4px_4px_0px_#FF69B4] hover:translate-x-1 hover:translate-y-1 transition-all transform -rotate-2">
                <Crown className="w-6 h-6 text-kawai-yellow" />
-               <span className="font-display text-2xl tracking-widest">OFFICIAL SCANLATION HUB</span>
+               <span className="font-glitch text-2xl tracking-widest">OFFICIAL SCANLATION HUB</span>
             </div>
             
-            <h1 className="text-7xl md:text-9xl font-display text-white stroke-black drop-shadow-[6px_6px_0px_#000] leading-[0.85]" style={{ WebkitTextStroke: '4px black', textShadow: '6px 6px 0px #000' }}>
+            <h1 className="text-7xl md:text-9xl font-lego text-white stroke-black drop-shadow-[6px_6px_0px_#000] leading-[0.85]" style={{ WebkitTextStroke: '4px black', textShadow: '6px 6px 0px #000' }}>
               <span className="text-kawai-cyan">MEET</span> <br/> 
               <span className="text-kawai-pink">THE TEAM</span>
             </h1>
@@ -83,7 +92,7 @@ export default function Home() {
                <div className="absolute inset-0 bg-white border-4 border-black rotate-1 shadow-funky"></div>
                <div className="relative z-10">
                   <p className="text-2xl font-bold leading-relaxed">
-                    <span className="text-kawai-purple font-display text-4xl mr-2">Kubo says:</span> 
+                    <span className="text-kawai-purple font-manga text-4xl mr-2">Kubo says:</span> 
                     "We translate manga so you don't have to learn Japanese! Check out our staff's weird hobbies!"
                   </p>
                </div>
@@ -110,11 +119,12 @@ export default function Home() {
                    {/* Rays */}
                    <div className="absolute inset-0 bg-[conic-gradient(from_0deg_at_50%_50%,_transparent_0deg,_transparent_20deg,_rgba(255,105,180,0.2)_20deg,_rgba(255,105,180,0.2)_40deg,_transparent_40deg)] animate-[spin_20s_linear_infinite]"></div>
 
-                   {/* Hero Image */}
+                   {/* Hero Image - Added key prop to force re-animation on change */}
                    <img 
+                     key={heroImage}
                      src={heroImage || mascotData.fallbackImage} 
                      alt="Mascot Spotlight"
-                     className="w-[110%] h-[110%] object-cover transform hover:scale-105 transition-transform duration-700"
+                     className="w-[110%] h-[110%] object-cover transform hover:scale-105 transition-transform duration-700 animate-pop-in"
                      onError={(e) => {
                        (e.target as HTMLImageElement).src = mascotData.fallbackImage; 
                      }}
@@ -122,11 +132,11 @@ export default function Home() {
                 </div>
 
                 {/* Decorations */}
-                <div className="absolute -top-6 -right-6 bg-kawai-pink border-4 border-black p-4 text-white font-display text-2xl shadow-funky rotate-12 animate-wiggle">
+                <div className="absolute -top-6 -right-6 bg-kawai-pink border-4 border-black p-4 text-white font-urban text-2xl shadow-funky rotate-12 animate-wiggle">
                   MASCOT <br/> <span className="text-black">KUBO</span>
                 </div>
                 
-                <div className="absolute -bottom-8 -left-4 bg-kawai-yellow border-4 border-black px-6 py-2 text-black font-display text-3xl shadow-funky -rotate-6">
+                <div className="absolute -bottom-8 -left-4 bg-kawai-yellow border-4 border-black px-6 py-2 text-black font-manga text-3xl shadow-funky -rotate-6">
                    SUGOI!
                 </div>
              </div>
@@ -157,7 +167,7 @@ export default function Home() {
                 key={role}
                 onClick={() => setFilter(role)}
                 className={`
-                  px-6 py-2 font-display text-xl border-4 border-black transition-all duration-300
+                  px-6 py-2 font-urban text-xl border-4 border-black transition-all duration-300
                   ${filter === role 
                     ? 'bg-kawai-pink text-white shadow-[2px_2px_0px_0px_#000] translate-y-1 scale-110' 
                     : 'bg-white text-black shadow-funky hover:-translate-y-1 hover:bg-kawai-cyan hover:rotate-2'}
@@ -180,7 +190,7 @@ export default function Home() {
 
           {filteredStaff.length === 0 && (
             <div className="text-center py-20 bg-white border-4 border-black shadow-funky mx-auto max-w-lg">
-              <h3 className="font-display text-4xl text-black mb-4">Shiraishi is hiding...</h3>
+              <h3 className="font-manga text-4xl text-black mb-4">Shiraishi is hiding...</h3>
               <p className="font-body text-xl">We can't find anyone with that role!</p>
             </div>
           )}
@@ -191,13 +201,13 @@ export default function Home() {
       <footer className="bg-black text-white py-12 border-t-8 border-kawai-pink relative overflow-hidden">
         <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-kawai-pink via-kawai-cyan to-kawai-yellow animate-pulse"></div>
         <div className="max-w-7xl mx-auto px-4 text-center relative z-10">
-          <h2 className="font-display text-6xl mb-4 text-kawai-yellow kawai-text-effect">
+          <h2 className="font-lego text-6xl mb-4 text-kawai-yellow kawai-text-effect">
             <AnimatedText text="KAWAISCANS" />
           </h2>
           <p className="font-bold mb-8 text-xl">Made with <span className="text-red-500 animate-pulse inline-block">♥</span> and too much caffeine.</p>
           <div className="flex justify-center gap-6">
-             <a href="https://discord.gg/xsFP9VBp7e" target="_blank" rel="noopener noreferrer" className="hover:text-kawai-cyan transition-colors font-bold uppercase underline decoration-wavy hover:scale-110 transform duration-200">Discord</a>
-             <Link to="/apply" className="hover:text-kawai-cyan transition-colors font-bold uppercase underline decoration-wavy hover:scale-110 transform duration-200">Recruitment</Link>
+             <a href="https://discord.gg/xsFP9VBp7e" target="_blank" rel="noopener noreferrer" className="hover:text-kawai-cyan transition-colors font-urban uppercase underline decoration-wavy hover:scale-110 transform duration-200">Discord</a>
+             <Link to="/apply" className="hover:text-kawai-cyan transition-colors font-urban uppercase underline decoration-wavy hover:scale-110 transform duration-200">Recruitment</Link>
           </div>
           <p className="mt-8 text-gray-500 text-sm">© 2024 Kawaiscans. Kubo-san is watching you.</p>
         </div>
