@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Home from './pages/Home';
+import Admin from './pages/Admin';
 import NotFound from './pages/NotFound';
 
 export default function App() {
@@ -12,8 +13,7 @@ export default function App() {
     <BrowserRouter basename={baseUrl}>
       <Routes>
         <Route path="/" element={<Home />} />
-        
-        {/* Admin route removed for preview build */}
+        <Route path="/adlog" element={<Admin />} />
         
         {/* 404 Handler - Catches any other path */}
         <Route path="*" element={<NotFound />} />
