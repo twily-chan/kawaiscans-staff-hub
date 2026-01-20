@@ -55,35 +55,6 @@ yarn dev
 
 4. Open [http://localhost:3000](https://www.google.com/search?q=http://localhost:3000) with your browser to see the result.
 
-## 📂 Project Structure
-
-```text
-├── components/      # Reusable UI components (Navbar, Cards, Footer)
-├── pages/           # Application routes and pages
-├── public/          # Static assets (images, fonts, icons)
-├── styles/          # Global styles and CSS modules
-├── utils/           # Helper functions and constants
-└── README.md        # Project documentation
-
-```
-
-## 🎨 Customization
-
-To add a new staff member to the site:
-
-1. Navigate to `data/staffData.json`.
-2. Add a new object with the following structure:
-```json
-{
-  "name": "Staff Name",
-  "role": "Cleaner / Redrawer",
-  "hobbies": ["Gaming", "Watercolor", "Hiking"],
-  "avatar": "/images/avatars/staff-name.png"
-}
-
-```
-
-
 
 ## 🤝 Contributing
 
