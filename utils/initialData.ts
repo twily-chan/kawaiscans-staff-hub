@@ -3,7 +3,7 @@ import { StaffMember, MascotData } from '../types';
 
 // Update this version number whenever you push new changes to GitHub!
 // This forces visitors' browsers to load the new data instead of their old cached copy.
-export const DATA_VERSION = '1768912632820';
+export const DATA_VERSION = '1768913404709';
 
 export const INITIAL_HOBBY_CATEGORIES = [
   "Active",
@@ -118,6 +118,34 @@ export const INITIAL_STAFF: StaffMember[] = [
     ],
     "powerLevel": 6800,
     "coffeeConsumption": 3
+  },
+  {
+    "id": "1768913155413",
+    "name": "Azasapag",
+    "role": "Translator",
+    "avatarUrl": "https://api.dicebear.com/7.x/avataaars/svg?seed=1768913155413",
+    "bio": "I'm new here I'm from Indonesia but I'm currently living in Japan ",
+    "favManga": "Uma Musume ",
+    "hobbies": [
+      {
+        "name": "Reading ",
+        "category": "Active"
+      },
+      {
+        "name": "Translating ",
+        "category": "Lolicon"
+      },
+      {
+        "name": "Gooning ",
+        "category": "Otaku"
+      },
+      {
+        "name": "Sleeping ",
+        "category": "Weeb"
+      }
+    ],
+    "powerLevel": 5000,
+    "coffeeConsumption": 1
   }
 ];
 
