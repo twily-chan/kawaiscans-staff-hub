@@ -3,7 +3,7 @@ import { StaffMember, MascotData } from '../types';
 
 // Update this version number whenever you push new changes to GitHub!
 // This forces visitors' browsers to load the new data instead of their old cached copy.
-export const DATA_VERSION = '1768921727767';
+export const DATA_VERSION = '1768922016638';
 
 export const INITIAL_HOBBY_CATEGORIES = [
   "Active",
@@ -153,6 +153,32 @@ export const INITIAL_STAFF: StaffMember[] = [
       {
         "name": "Gaming ",
         "category": "Weeb"
+      }
+    ],
+    "powerLevel": 5000,
+    "coffeeConsumption": 1
+  },
+  {
+    "id": "1768921857833",
+    "name": "Blood ",
+    "roles": [
+      "Typesetter"
+    ],
+    "avatarUrl": "https://media.tenor.com/A52FEvjgoCgAAAAi/shoto-anime.gif",
+    "bio": "I'm a new member of this group also in ts as well as a workless person cuz everytime i get work, I bing it it in an hour or two, then again start yapping \" I need more work\".",
+    "favManga": "Reaper's blood ",
+    "hobbies": [
+      {
+        "name": "Work ",
+        "category": "Active"
+      },
+      {
+        "name": "Work",
+        "category": "Active"
+      },
+      {
+        "name": "Work",
+        "category": "Active"
       }
     ],
     "powerLevel": 5000,
