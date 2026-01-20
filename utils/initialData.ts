@@ -3,7 +3,7 @@ import { StaffMember, MascotData } from '../types';
 
 // Update this version number whenever you push new changes to GitHub!
 // This forces visitors' browsers to load the new data instead of their old cached copy.
-export const DATA_VERSION = '1768913404709';
+export const DATA_VERSION = '1768914129558';
 
 export const INITIAL_HOBBY_CATEGORIES = [
   "Active",
@@ -123,7 +123,7 @@ export const INITIAL_STAFF: StaffMember[] = [
     "id": "1768913155413",
     "name": "Azasapag",
     "role": "Translator",
-    "avatarUrl": "https://api.dicebear.com/7.x/avataaars/svg?seed=1768913155413",
+    "avatarUrl": "https://media.tenor.com/Ru5PhSjAJ3gAAAAi/hikari-shupogaki.gif",
     "bio": "I'm new here I'm from Indonesia but I'm currently living in Japan ",
     "favManga": "Uma Musume ",
     "hobbies": [
@@ -142,6 +142,58 @@ export const INITIAL_STAFF: StaffMember[] = [
       {
         "name": "Sleeping ",
         "category": "Weeb"
+      }
+    ],
+    "powerLevel": 5000,
+    "coffeeConsumption": 1
+  },
+  {
+    "id": "1768913707622",
+    "name": "Risrock",
+    "role": "Redrawer",
+    "avatarUrl": "https://media.tenor.com/1qQAPvpu2FwAAAAi/shinky-id.gif",
+    "bio": "I'm just a normal cleaner and redrawer I love reading manga's and stuff.",
+    "favManga": "One piece ",
+    "hobbies": [
+      {
+        "name": "Reading ",
+        "category": "Active"
+      },
+      {
+        "name": "Cleaning ",
+        "category": "Otaku"
+      },
+      {
+        "name": "Drawing ",
+        "category": "Weeb"
+      },
+      {
+        "name": "Sleeping ",
+        "category": "Cringe"
+      }
+    ],
+    "powerLevel": 5000,
+    "coffeeConsumption": 1
+  },
+  {
+    "id": "1768913873671",
+    "name": "Chen",
+    "role": "Redrawer",
+    "avatarUrl": "https://media1.tenor.com/m/PVwkr8OVipEAAAAC/my-dress-up-darling-marin-kitagawa.gif",
+    "bio": "I'm a digital artist i love drawing stuff.",
+    "favManga": "Angel next door ",
+    "hobbies": [
+      {
+        "name": "Artist ",
+        "category": "Weeb"
+      },
+      {
+        "name": "Drawing ",
+        "category": "Active"
+      },
+      {
+        "name": "Sleeping ",
+        "category": "Otaku"
       }
     ],
     "powerLevel": 5000,
