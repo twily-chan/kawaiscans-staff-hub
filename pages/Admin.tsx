@@ -4,7 +4,7 @@ import { jwtDecode } from 'jwt-decode';
 import { Link } from 'react-router-dom';
 import { getStaffData, saveStaffData, getMascotData, saveMascotData, getHobbyCategories, saveHobbyCategories } from '../utils/storage';
 import { StaffMember, MascotData } from '../types';
-import { Trash2, Save, UploadCloud, Plus, RefreshCw, LogOut, Dices, X, AlertTriangle } from 'lucide-react';
+import { Trash2, Save, UploadCloud, Plus, RefreshCw, LogOut, Dices, X, AlertTriangle, Key } from 'lucide-react';
 
 export default function Admin() {
   const [user, setUser] = useState<any>(null);
@@ -14,6 +14,10 @@ export default function Admin() {
   const [isSyncing, setIsSyncing] = useState(false);
   const [statusMsg, setStatusMsg] = useState<{type: 'success' | 'error' | 'info', text: string} | null>(null);
   const [newCategory, setNewCategory] = useState('');
+  
+  // Token management state
+  const [githubToken, setGithubToken] = useState('');
+  const [showTokenInput, setShowTokenInput] = useState(false);
 
   // Authorized emails from env
   const adminEmails = (import.meta.env.VITE_ADMIN_EMAILS || '').split(',');
@@ -23,6 +27,12 @@ export default function Admin() {
     setStaffList(getStaffData());
     setMascotData(getMascotData());
     setHobbyCategories(getHobbyCategories());
+
+    // Load token from local storage if exists
+    const storedToken = localStorage.getItem('kawai_gh_token');
+    if (storedToken) {
+      setGithubToken(storedToken);
+    }
   }, []);
 
   const handleLoginSuccess = (credentialResponse: any) => {
@@ -38,6 +48,17 @@ export default function Admin() {
     }
   };
 
+  const saveToken = () => {
+    if (githubToken.trim().startsWith('ghp_')) {
+      localStorage.setItem('kawai_gh_token', githubToken.trim());
+      setStatusMsg({ type: 'success', text: 'Token saved to your browser securely.' });
+      setShowTokenInput(false);
+      setTimeout(() => setStatusMsg(null), 3000);
+    } else {
+      setStatusMsg({ type: 'error', text: 'Invalid Token format. Must start with ghp_' });
+    }
+  };
+
   const handleSaveLocal = () => {
     saveStaffData(staffList);
     saveMascotData(mascotData);
@@ -47,16 +68,16 @@ export default function Admin() {
   };
 
   const handlePushToGithub = async () => {
+    if (!githubToken) {
+      setShowTokenInput(true);
+      setStatusMsg({ type: 'error', text: 'Please enter your GitHub Token first.' });
+      return;
+    }
+
     setIsSyncing(true);
     setStatusMsg({ type: 'info', text: 'Pushing to GitHub... This might take a few seconds.' });
     
     try {
-      // Check if token exists
-      const token = import.meta.env.VITE_GITHUB_TOKEN;
-      if (!token || token.includes('your-token')) {
-        throw new Error("Missing GitHub Token. Please check your .env file.");
-      }
-
       // Generate the file content string
       const fileContent = `
 import { StaffMember, MascotData } from '../types';
@@ -76,7 +97,7 @@ export const INITIAL_MASCOT: MascotData = ${JSON.stringify(mascotData, null, 2)}
         method: 'POST',
         headers: {
           Accept: 'application/vnd.github.v3+json',
-          Authorization: `token ${token}`,
+          Authorization: `token ${githubToken}`,
         },
         body: JSON.stringify({
           event_type: 'update_data',
@@ -91,9 +112,10 @@ export const INITIAL_MASCOT: MascotData = ${JSON.stringify(mascotData, null, 2)}
         console.error('GitHub Error:', errorText);
         
         if (response.status === 401) {
-           setStatusMsg({ type: 'error', text: 'ERROR: Invalid API Key (401). Check VITE_GITHUB_TOKEN.' });
+           setStatusMsg({ type: 'error', text: 'ERROR: Invalid Token (401). Update your token.' });
+           setShowTokenInput(true);
         } else if (response.status === 404) {
-           setStatusMsg({ type: 'error', text: 'ERROR: Repo not found (404). Check VITE_GITHUB_REPO or Token permissions.' });
+           setStatusMsg({ type: 'error', text: 'ERROR: Repo not found (404). Check VITE_GITHUB_REPO env var.' });
         } else {
            setStatusMsg({ type: 'error', text: `ERROR: ${response.status} - Check console.` });
         }
@@ -208,26 +230,61 @@ export const INITIAL_MASCOT: MascotData = ${JSON.stringify(mascotData, null, 2)}
       <div className="max-w-6xl mx-auto p-4 space-y-8 mt-8">
         
         {/* ACTION BAR */}
-        <div className="bg-white p-4 border-4 border-black shadow-funky flex flex-col md:flex-row gap-4 justify-between items-center sticky top-20 z-40">
-           <div className="text-lg font-bold flex-1">
-             {statusMsg && (
-               <span className={`flex items-center gap-2 ${
-                 statusMsg.type === 'error' ? 'text-red-600' : 
-                 statusMsg.type === 'success' ? 'text-green-600' : 'text-kawai-purple'
-               } animate-pulse`}>
-                 {statusMsg.type === 'error' && <AlertTriangle size={20} />}
-                 {statusMsg.text}
-               </span>
-             )}
+        <div className="bg-white p-4 border-4 border-black shadow-funky flex flex-col md:flex-col gap-4 sticky top-20 z-40">
+           
+           <div className="flex flex-col md:flex-row gap-4 justify-between items-center w-full">
+             <div className="text-lg font-bold flex-1">
+               {statusMsg && (
+                 <span className={`flex items-center gap-2 ${
+                   statusMsg.type === 'error' ? 'text-red-600' : 
+                   statusMsg.type === 'success' ? 'text-green-600' : 'text-kawai-purple'
+                 } animate-pulse`}>
+                   {statusMsg.type === 'error' && <AlertTriangle size={20} />}
+                   {statusMsg.text}
+                 </span>
+               )}
+             </div>
+             
+             <div className="flex gap-4">
+               {/* Token Button */}
+               <button 
+                 onClick={() => setShowTokenInput(!showTokenInput)} 
+                 className={`flex items-center gap-2 px-3 py-2 border-2 border-black font-bold text-sm ${githubToken ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}
+               >
+                 <Key size={16} /> {githubToken ? 'Token Active' : 'Set Token'}
+               </button>
+
+               <button onClick={handleSaveLocal} className="flex items-center gap-2 px-4 py-2 bg-white border-2 border-black hover:bg-gray-100 font-bold">
+                 <Save size={18} /> Save Local
+               </button>
+               <button onClick={handlePushToGithub} disabled={isSyncing} className={`flex items-center gap-2 px-4 py-2 bg-kawai-pink text-white border-2 border-black font-bold shadow-[2px_2px_0px_#000] hover:translate-y-1 hover:shadow-none transition-all ${isSyncing ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                 <UploadCloud size={18} /> {isSyncing ? 'Syncing...' : 'PUSH TO GITHUB'}
+               </button>
+             </div>
            </div>
-           <div className="flex gap-4">
-             <button onClick={handleSaveLocal} className="flex items-center gap-2 px-4 py-2 bg-white border-2 border-black hover:bg-gray-100 font-bold">
-               <Save size={18} /> Save Local
-             </button>
-             <button onClick={handlePushToGithub} disabled={isSyncing} className={`flex items-center gap-2 px-4 py-2 bg-kawai-pink text-white border-2 border-black font-bold shadow-[2px_2px_0px_#000] hover:translate-y-1 hover:shadow-none transition-all ${isSyncing ? 'opacity-50 cursor-not-allowed' : ''}`}>
-               <UploadCloud size={18} /> {isSyncing ? 'Syncing...' : 'PUSH TO GITHUB'}
-             </button>
-           </div>
+
+           {/* Token Input Dropdown */}
+           {showTokenInput && (
+              <div className="w-full bg-gray-100 p-4 border-t-2 border-dashed border-gray-400 flex flex-col gap-2">
+                <p className="text-sm font-bold text-gray-700">GitHub Personal Access Token (PAT):</p>
+                <div className="flex gap-2">
+                  <input 
+                    type="password" 
+                    value={githubToken} 
+                    onChange={(e) => setGithubToken(e.target.value)} 
+                    placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" 
+                    className="flex-1 border-2 border-gray-300 p-2 text-sm"
+                  />
+                  <button onClick={saveToken} className="bg-kawai-cyan border-2 border-black px-4 font-bold hover:bg-cyan-300">
+                    SAVE TOKEN
+                  </button>
+                </div>
+                <p className="text-xs text-gray-500">
+                  <span className="text-red-500 font-bold">SECURITY NOTICE:</span> This token is saved to your browser's Local Storage. 
+                  It is NEVER uploaded to the public code. This prevents GitHub from revoking it.
+                </p>
+              </div>
+           )}
         </div>
 
         {/* HOBBY CATEGORY CONFIG */}
