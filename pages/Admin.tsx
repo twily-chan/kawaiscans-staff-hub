@@ -4,6 +4,7 @@ import { StaffMember, MascotData, Hobby } from '../types';
 import { Trash2, Plus, Save, Edit, LogOut, Download, AlertTriangle, UserCheck, CloudLightning, Key, Github, CheckCircle, ShieldCheck, Lock } from 'lucide-react';
 import { GoogleLogin } from '@react-oauth/google';
 import { jwtDecode } from 'jwt-decode';
+import { Link } from 'react-router-dom';
 
 export default function Admin() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -61,8 +62,6 @@ export default function Admin() {
       const email = decoded.email;
 
       if (ALLOWED_ADMINS.includes(email) || ALLOWED_ADMINS.length === 0) {
-        // If list is empty, we allow access (dev mode) or block all? 
-        // Better to allow if empty for testing, but warn.
         setIsAuthenticated(true);
         setUserEmail(email);
         sessionStorage.setItem('kawai_admin_auth', 'true');
@@ -84,7 +83,7 @@ export default function Admin() {
     setUserEmail('');
     sessionStorage.removeItem('kawai_admin_auth');
     sessionStorage.removeItem('kawai_admin_email');
-    window.location.href = '/';
+    window.location.href = import.meta.env.BASE_URL; // Redirect to Home
   };
 
   // Staff Management
@@ -248,7 +247,7 @@ export const INITIAL_MASCOT: MascotData = ${JSON.stringify(mascotData, null, 2)}
           </div>
           
           <div className="mt-8 text-center">
-            <a href="/" className="underline text-gray-500 hover:text-black">Back to Home</a>
+            <Link to="/" className="underline text-gray-500 hover:text-black">Back to Home</Link>
           </div>
         </div>
       </div>
@@ -269,7 +268,6 @@ export const INITIAL_MASCOT: MascotData = ${JSON.stringify(mascotData, null, 2)}
         <div className="bg-white border-4 border-kawai-cyan w-full max-w-2xl p-6 shadow-funky relative">
           <h2 className="font-display text-3xl mb-4 border-b-4 border-black pb-2">Editing: {editingStaff.name}</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-             {/* ... inputs ... */}
             <div>
               <label className="font-bold text-xs">Name</label>
               <input className="w-full border-2 border-black p-1" value={editingStaff.name} onChange={e => setEditingStaff({...editingStaff, name: e.target.value})} />
@@ -399,7 +397,7 @@ export const INITIAL_MASCOT: MascotData = ${JSON.stringify(mascotData, null, 2)}
              <UserCheck size={16} />
              <span>{userEmail}</span>
           </div>
-          <a href="/" target="_blank" rel="noopener noreferrer" className="hover:text-kawai-pink font-bold underline">Open Site</a>
+          <Link to="/" target="_blank" rel="noopener noreferrer" className="hover:text-kawai-pink font-bold underline">Open Site</Link>
           <button onClick={handleLogout} className="flex items-center gap-2 bg-red-500 text-white px-3 py-1 font-bold border-2 border-white hover:bg-red-600">
             <LogOut size={16} /> Logout
           </button>

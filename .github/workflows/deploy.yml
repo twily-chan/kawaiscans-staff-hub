@@ -31,6 +31,9 @@ jobs:
           VITE_GITHUB_REPO: ${{ secrets.VITE_GITHUB_REPO }}
         run: |
           npm run build
+          # Create a copy of index.html as 404.html. 
+          # This allows GitHub Pages to serve the React app on 404 errors, enabling clean URLs.
+          cp dist/index.html dist/404.html
           touch dist/.nojekyll
 
       - name: Deploy to GitHub Pages
