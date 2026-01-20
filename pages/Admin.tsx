@@ -4,7 +4,7 @@ import { jwtDecode } from 'jwt-decode';
 import { Link } from 'react-router-dom';
 import { getStaffData, saveStaffData, getMascotData, saveMascotData, getHobbyCategories, saveHobbyCategories } from '../utils/storage';
 import { StaffMember, MascotData } from '../types';
-import { Trash2, Save, UploadCloud, Plus, RefreshCw, LogOut, Dices, X } from 'lucide-react';
+import { Trash2, Save, UploadCloud, Plus, RefreshCw, LogOut, Dices, X, AlertTriangle } from 'lucide-react';
 
 export default function Admin() {
   const [user, setUser] = useState<any>(null);
@@ -12,7 +12,7 @@ export default function Admin() {
   const [mascotData, setMascotData] = useState<MascotData>({ gifs: [], quotes: [], fallbackImage: '' });
   const [hobbyCategories, setHobbyCategories] = useState<string[]>([]);
   const [isSyncing, setIsSyncing] = useState(false);
-  const [statusMsg, setStatusMsg] = useState('');
+  const [statusMsg, setStatusMsg] = useState<{type: 'success' | 'error' | 'info', text: string} | null>(null);
   const [newCategory, setNewCategory] = useState('');
 
   // Authorized emails from env
@@ -42,15 +42,21 @@ export default function Admin() {
     saveStaffData(staffList);
     saveMascotData(mascotData);
     saveHobbyCategories(hobbyCategories);
-    setStatusMsg('Saved to local browser storage! (Visitors won\'t see this yet)');
-    setTimeout(() => setStatusMsg(''), 3000);
+    setStatusMsg({ type: 'success', text: 'Saved to local browser storage! (Visitors won\'t see this yet)' });
+    setTimeout(() => setStatusMsg(null), 3000);
   };
 
   const handlePushToGithub = async () => {
     setIsSyncing(true);
-    setStatusMsg('Pushing to GitHub... This might take a few seconds.');
+    setStatusMsg({ type: 'info', text: 'Pushing to GitHub... This might take a few seconds.' });
     
     try {
+      // Check if token exists
+      const token = import.meta.env.VITE_GITHUB_TOKEN;
+      if (!token || token.includes('your-token')) {
+        throw new Error("Missing GitHub Token. Please check your .env file.");
+      }
+
       // Generate the file content string
       const fileContent = `
 import { StaffMember, MascotData } from '../types';
@@ -70,7 +76,7 @@ export const INITIAL_MASCOT: MascotData = ${JSON.stringify(mascotData, null, 2)}
         method: 'POST',
         headers: {
           Accept: 'application/vnd.github.v3+json',
-          Authorization: `token ${import.meta.env.VITE_GITHUB_TOKEN}`,
+          Authorization: `token ${token}`,
         },
         body: JSON.stringify({
           event_type: 'update_data',
@@ -79,14 +85,22 @@ export const INITIAL_MASCOT: MascotData = ${JSON.stringify(mascotData, null, 2)}
       });
 
       if (response.ok) {
-        setStatusMsg('SUCCESS! GitHub is rebuilding the site. Wait ~2 mins.');
+        setStatusMsg({ type: 'success', text: 'SUCCESS! GitHub is rebuilding the site. Wait ~2 mins.' });
       } else {
-        setStatusMsg('ERROR: Check console for details.');
-        console.error('GitHub Error:', await response.text());
+        const errorText = await response.text();
+        console.error('GitHub Error:', errorText);
+        
+        if (response.status === 401) {
+           setStatusMsg({ type: 'error', text: 'ERROR: Invalid API Key (401). Check VITE_GITHUB_TOKEN.' });
+        } else if (response.status === 404) {
+           setStatusMsg({ type: 'error', text: 'ERROR: Repo not found (404). Check VITE_GITHUB_REPO or Token permissions.' });
+        } else {
+           setStatusMsg({ type: 'error', text: `ERROR: ${response.status} - Check console.` });
+        }
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
-      setStatusMsg('Network Error.');
+      setStatusMsg({ type: 'error', text: error.message || 'Network Error.' });
     } finally {
       setIsSyncing(false);
     }
@@ -195,8 +209,16 @@ export const INITIAL_MASCOT: MascotData = ${JSON.stringify(mascotData, null, 2)}
         
         {/* ACTION BAR */}
         <div className="bg-white p-4 border-4 border-black shadow-funky flex flex-col md:flex-row gap-4 justify-between items-center sticky top-20 z-40">
-           <div className="text-lg font-bold">
-             {statusMsg && <span className="text-kawai-purple animate-pulse">{statusMsg}</span>}
+           <div className="text-lg font-bold flex-1">
+             {statusMsg && (
+               <span className={`flex items-center gap-2 ${
+                 statusMsg.type === 'error' ? 'text-red-600' : 
+                 statusMsg.type === 'success' ? 'text-green-600' : 'text-kawai-purple'
+               } animate-pulse`}>
+                 {statusMsg.type === 'error' && <AlertTriangle size={20} />}
+                 {statusMsg.text}
+               </span>
+             )}
            </div>
            <div className="flex gap-4">
              <button onClick={handleSaveLocal} className="flex items-center gap-2 px-4 py-2 bg-white border-2 border-black hover:bg-gray-100 font-bold">
@@ -325,30 +347,6 @@ export const INITIAL_MASCOT: MascotData = ${JSON.stringify(mascotData, null, 2)}
               </div>
             ))}
           </div>
-        </div>
-
-        {/* MASCOT SECTION */}
-        <div className="bg-white p-6 border-4 border-black">
-           <h2 className="text-3xl font-display mb-6 border-b-2 border-gray-200 pb-2">Mascot Config</h2>
-           <div className="grid md:grid-cols-2 gap-8">
-             <div>
-               <h3 className="font-bold mb-2">GIF URLs (One per line)</h3>
-               <textarea 
-                 className="w-full border-2 border-gray-300 p-2 font-mono text-xs h-40"
-                 value={mascotData.gifs.join('\n')}
-                 onChange={(e) => setMascotData({...mascotData, gifs: e.target.value.split('\n').filter(s => s.trim() !== '')})}
-               />
-               <p className="text-xs text-gray-500 mt-1">These cycle randomly on the home page.</p>
-             </div>
-             <div>
-               <h3 className="font-bold mb-2">Quotes (One per line)</h3>
-               <textarea 
-                 className="w-full border-2 border-gray-300 p-2 font-mono text-xs h-40"
-                 value={mascotData.quotes.join('\n')}
-                 onChange={(e) => setMascotData({...mascotData, quotes: e.target.value.split('\n').filter(s => s.trim() !== '')})}
-               />
-             </div>
-           </div>
         </div>
 
       </div>
